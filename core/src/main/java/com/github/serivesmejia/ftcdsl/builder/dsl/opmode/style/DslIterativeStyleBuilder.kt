@@ -37,19 +37,21 @@ class DslIterativeStyleBuilder<R : RobotBuilder> : DslOpModeStyleBuilder<R>() {
     }
 
     override fun execute() {
-        opMode?.let {
+        opMode?.let { opMode ->
             call(initCall)
 
-            while (!it.isStarted && !it.isStopRequested) {
+            while (!opMode.isStarted && !opMode.isStopRequested) {
                 call(initLoopCall)
-                it.updateGamepads()
+                opMode.updateGamepads()
             }
+
+            opMode.waitForStart() //just in case
 
             call(startCall)
 
             while (!Thread.currentThread().isInterrupted) {
                 call(loopCall)
-                it.updateGamepads()
+                opMode.updateGamepads()
             }
 
             call(stopCall)

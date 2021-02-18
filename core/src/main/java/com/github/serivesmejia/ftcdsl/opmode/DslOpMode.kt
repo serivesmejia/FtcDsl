@@ -4,10 +4,13 @@ import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.DslOpModeBuilder
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.*
+import com.qualcomm.robotcore.util.ElapsedTime
 
 open class DslOpMode<R: RobotBuilder>(buildCallback: DslOpModeBuilder<R>.() -> Unit) : LinearOpMode() {
 
     private var builder: DslOpModeBuilder<R> = DslOpModeBuilder()
+
+    private var timer = ElapsedTime()
 
     init {
         buildCallback(builder)
@@ -25,6 +28,14 @@ open class DslOpMode<R: RobotBuilder>(buildCallback: DslOpModeBuilder<R>.() -> U
 
     fun whileActive(callback: () -> Unit) {
         while(!Thread.currentThread().isInterrupted) {
+            callback()
+        }
+    }
+
+    fun whileTime(millis: Long, callback: () -> Unit) {
+        timer.reset()
+
+        while(timer.milliseconds() < millis) {
             callback()
         }
     }

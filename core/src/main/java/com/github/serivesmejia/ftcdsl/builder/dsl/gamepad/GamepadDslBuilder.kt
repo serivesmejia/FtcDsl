@@ -5,7 +5,7 @@ import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
 
-class GamepadDslBuilder<R : RobotBuilder>() : DslBuilder {
+class GamepadDslBuilder<R : RobotBuilder> : DslBuilder {
 
     val A = Button.A
     val B = Button.B
@@ -16,6 +16,17 @@ class GamepadDslBuilder<R : RobotBuilder>() : DslBuilder {
     val dpadDown = Button.DPAD_DOWN
     val dpadLeft = Button.DPAD_LEFT
     val dpadRight = Button.DPAD_RIGHT
+
+    val leftBumper = Button.LEFT_BUMPER
+    val rightBumper = Button.RIGHT_BUMPER
+    val leftTrigger = Button.LEFT_TRIGGER
+    val rightTrigger = Button.RIGHT_TRIGGER
+
+    val leftJoystick = Button.LEFT_JOYSTICK
+    val rightJoystick = Button.RIGHT_JOYSTICK
+
+    val start = Button.START
+    val back = Button.BACK
 
     private val buttonBuilders = HashMap<Button, GamepadButtonDslBuilder<R>>()
 

@@ -63,7 +63,7 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
          gamepad2.gamepad = opMode?.gamepad2
 
          opMode?.robot = robot
-         opMode?.hardwareMap?.let { robot?.build(it) }
+         opMode?.hardwareMap?.let { robot?.internalBuild(it) }
 
          //build mini dsl here if user is just using the gamepad stuff
          if(builder == null) {

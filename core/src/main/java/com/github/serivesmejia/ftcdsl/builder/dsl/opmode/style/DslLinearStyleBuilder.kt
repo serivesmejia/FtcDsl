@@ -1,12 +1,12 @@
-package com.github.serivesmejia.ftcdsl.builder.dsl.opmode
+package com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style
 
-import com.github.serivesmejia.ftcdsl.builder.dsl.DslBuilder
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 
-open class LinearDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>,
-                                              private var callback: DslOpMode<R>.() -> Unit) : DslBuilder {
+class DslLinearStyleBuilder<R : RobotBuilder>(private var callback: DslOpMode<R>.() -> Unit) : DslOpModeStyleBuilder<R>() {
     override fun execute() {
-        callback(opMode)
+        opMode?.let {
+            callback(it)
+        }
     }
 }

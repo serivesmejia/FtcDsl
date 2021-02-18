@@ -1,10 +1,9 @@
-package com.github.serivesmejia.ftcdsl.builder.dsl.opmode
+package com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style
 
-import com.github.serivesmejia.ftcdsl.builder.dsl.DslBuilder
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 
-class IterativeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : DslBuilder {
+class DslIterativeStyleBuilder<R : RobotBuilder> : DslOpModeStyleBuilder<R>() {
 
     private var initCall: (DslOpMode<R>.() -> Unit)? = null
     private var initLoopCall: (DslOpMode<R>.() -> Unit)? = null
@@ -38,25 +37,31 @@ class IterativeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : 
     }
 
     override fun execute() {
-        call(initCall)
+        opMode?.let {
+            call(initCall)
 
-        while(!opMode.isStarted && !opMode.isStopRequested) {
-            call(initLoopCall)
-            opMode.updateGamepads()
+            while (!it.isStarted && !it.isStopRequested) {
+                call(initLoopCall)
+                it.updateGamepads()
+            }
+
+            call(startCall)
+
+            while (!Thread.currentThread().isInterrupted) {
+                call(loopCall)
+                it.updateGamepads()
+            }
+
+            call(stopCall)
         }
-
-        call(startCall)
-
-        while(!Thread.currentThread().isInterrupted) {
-            call(loopCall)
-            opMode.updateGamepads()
-        }
-
-        call(stopCall)
     }
 
     private fun call(call: (DslOpMode<R>.() -> Unit)?) {
-        call?.let { it(opMode) }
+        call?.let { itCall ->
+            opMode?.let { itOpMode ->
+                itCall(itOpMode)
+            }
+        }
     }
 
     private fun checkCallDeclared(callback: (DslOpMode<R>.() -> Unit)?, name: String) {

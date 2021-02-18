@@ -1,2 +1,3 @@
+include ':examples'
 include ':core'
 rootProject.name = "FtcDsl"

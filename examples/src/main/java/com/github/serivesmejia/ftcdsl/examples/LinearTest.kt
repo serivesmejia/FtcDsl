@@ -1,4 +1,4 @@
-package com.github.serivesmejia.ftcdsl
+package com.github.serivesmejia.ftcdsl.examples
 
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp

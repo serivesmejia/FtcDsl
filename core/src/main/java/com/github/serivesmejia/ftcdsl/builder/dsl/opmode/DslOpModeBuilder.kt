@@ -1,13 +1,16 @@
 package com.github.serivesmejia.ftcdsl.builder.dsl.opmode
 
 import com.github.serivesmejia.ftcdsl.builder.dsl.DslBuilder
-import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.gamepad.GamepadDslBuilder
+import com.github.serivesmejia.ftcdsl.builder.dsl.gamepad.GamepadDslBuilder
+import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslOpModeStyleBuilder
+import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslIterativeStyleBuilder
+import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslLinearStyleBuilder
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 
-class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : DslBuilder {
+class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
 
-    private var builder: DslBuilder? = null
+    private var builder: DslOpModeStyleBuilder<R>? = null
 
     var robot: R? = null
         set(value) {
@@ -15,23 +18,22 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
                 throw IllegalAccessException("robot variable cannot be set more than once")
             }
             field = value
-            opMode.robot = value
         }
 
-    private val gamepad1 = GamepadDslBuilder(opMode)
-    private val gamepad2 = GamepadDslBuilder(opMode)
+    private val gamepad1 = GamepadDslBuilder<R>()
+    private val gamepad2 = GamepadDslBuilder<R>()
 
-    fun iterative(callback: IterativeDslBuilder<R>.() -> Unit) {
+    fun iterative(callback: DslIterativeStyleBuilder<R>.() -> Unit) {
         checkBuilderDeclared()
-        builder = IterativeDslBuilder(opMode)
+        builder = DslIterativeStyleBuilder()
 
         //call the callback which will build the DSL
-        callback(builder!! as IterativeDslBuilder<R>)
+        callback(builder!! as DslIterativeStyleBuilder<R>)
     }
 
     fun linear(callback: DslOpMode<R>.() -> Unit) {
         checkBuilderDeclared()
-        builder = LinearDslBuilder(opMode, callback)
+        builder = DslLinearStyleBuilder(callback)
         //no need to call callback here since we're not building anything else for linear
     }
 
@@ -52,13 +54,19 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
         }
     }
 
-    override fun execute() {
-        //setting the dsl gamepads the sdk instances
-        gamepad1.gamepad = opMode.gamepad1
-        gamepad2.gamepad = opMode.gamepad2
+     fun execute(opMode: DslOpMode<R>?) {
+         //setting the dsl gamepads the sdk instances
+         gamepad1.opMode = opMode
+         gamepad1.gamepad = opMode?.gamepad1
 
-        //build mini dsl here if user is just using the gamepad stuff
-        if(builder == null) {
+         gamepad2.opMode = opMode
+         gamepad2.gamepad = opMode?.gamepad2
+
+         opMode?.robot = robot
+         opMode?.hardwareMap?.let { robot?.build(it) }
+
+         //build mini dsl here if user is just using the gamepad stuff
+         if(builder == null) {
             linear {
                 waitForStart()
                 whileActive {
@@ -67,8 +75,12 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
             }
         }
 
+        builder!!.opMode = opMode
+
         //actually execute the user dsl
         builder!!.execute()
     }
+
+    override fun execute() = execute(null)
 
 }

@@ -1,4 +1,4 @@
-package com.github.serivesmejia.ftcdsl
+package com.github.serivesmejia.ftcdsl.examples
 
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.qualcomm.robotcore.hardware.DcMotor

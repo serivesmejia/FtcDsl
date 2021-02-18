@@ -42,12 +42,14 @@ class IterativeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : 
 
         while(!opMode.isStarted && !opMode.isStopRequested) {
             call(initLoopCall)
+            opMode.updateGamepads()
         }
 
         call(startCall)
 
         while(!Thread.currentThread().isInterrupted) {
             call(loopCall)
+            opMode.updateGamepads()
         }
 
         call(stopCall)

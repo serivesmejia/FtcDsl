@@ -7,30 +7,37 @@ import com.qualcomm.robotcore.hardware.Gamepad
 
 class GamepadDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : DslBuilder {
 
-    val A = Button.A
-    val B = Button.B
-    val X = Button.X
-    val Y = Button.Y
+    companion object {
+        val A = Button.A
+        val B = Button.B
+        val X = Button.X
+        val Y = Button.Y
+
+        val dpadUp = Button.DPAD_UP
+        val dpadDown = Button.DPAD_DOWN
+        val dpadLeft = Button.DPAD_LEFT
+        val dpadRight = Button.DPAD_RIGHT
+    }
 
     private val buttonBuilders = HashMap<Button, GamepadButtonDslBuilder<R>>()
 
     var gamepad: Gamepad? = null
 
     fun button(button: Button, callback: GamepadButtonDslBuilder<R>.() -> Unit) {
+        callback(button(button))
+    }
+
+    fun button(button: Button): GamepadButtonDslBuilder<R> {
         if(buttonBuilders.containsKey(button)) {
-            throw IllegalStateException("Callback already registered for button $button")
+            throw IllegalStateException("Callback has been already registered for button $button")
         }
 
-        val builder = GamepadButtonDslBuilder(opMode)
-        callback(builder)
-
+        val builder = GamepadButtonDslBuilder(button, this, opMode)
         buttonBuilders[button] = builder
+
+        return builder
     }
 
-    override fun execute() {
-        for(builder : buttonBuilders) {
-            builder.execute()
-        }
-    }
+    override fun execute() = buttonBuilders.values.forEach { it.execute() }
 
 }

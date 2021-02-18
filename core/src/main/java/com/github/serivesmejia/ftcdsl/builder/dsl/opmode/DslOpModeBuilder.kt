@@ -18,8 +18,8 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
             opMode.robot = value
         }
 
-    private val gamepad1 = GamepadDslBuilder<R>()
-    private val gamepad2 = GamepadDslBuilder<R>()
+    private val gamepad1 = GamepadDslBuilder(opMode)
+    private val gamepad2 = GamepadDslBuilder(opMode)
 
     fun iterative(callback: IterativeDslBuilder<R>.() -> Unit) {
         checkBuilderDeclared()
@@ -39,7 +39,7 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
 
     fun gamepad2(callback: GamepadDslBuilder<R>.() -> Unit) = callback(gamepad2)
 
-    fun updateGamepads() {
+    fun executeGamepads() {
         gamepad1.execute()
         gamepad2.execute()
     }
@@ -53,10 +53,22 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
     }
 
     override fun execute() {
+        //setting the dsl gamepads the sdk instances
         gamepad1.gamepad = opMode.gamepad1
         gamepad2.gamepad = opMode.gamepad2
 
-        builder?.execute()
+        //build mini dsl here if user is just using the gamepad stuff
+        if(builder == null) {
+            linear {
+                waitForStart()
+                whileActive {
+                    updateGamepads()
+                }
+            }
+        }
+
+        //actually execute the user dsl
+        builder!!.execute()
     }
 
 }

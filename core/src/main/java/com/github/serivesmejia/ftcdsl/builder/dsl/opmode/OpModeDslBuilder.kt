@@ -1,6 +1,7 @@
 package com.github.serivesmejia.ftcdsl.builder.dsl.opmode
 
 import com.github.serivesmejia.ftcdsl.builder.dsl.DslBuilder
+import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.gamepad.GamepadDslBuilder
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 
@@ -17,6 +18,9 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
             opMode.robot = value
         }
 
+    private val gamepad1 = GamepadDslBuilder<R>()
+    private val gamepad2 = GamepadDslBuilder<R>()
+
     fun iterative(callback: IterativeDslBuilder<R>.() -> Unit) {
         checkBuilderDeclared()
         builder = IterativeDslBuilder(opMode)
@@ -31,15 +35,27 @@ class OpModeDslBuilder<R : RobotBuilder>(private val opMode: DslOpMode<R>) : Dsl
         //no need to call callback here since we're not building anything else for linear
     }
 
+    fun gamepad1(callback: GamepadDslBuilder<R>.() -> Unit) = callback(gamepad1)
+
+    fun gamepad2(callback: GamepadDslBuilder<R>.() -> Unit) = callback(gamepad2)
+
+    fun updateGamepads() {
+        gamepad1.execute()
+        gamepad2.execute()
+    }
+
     //simple check to throw an exception if user is
     //trying to register more than one callback...
     private fun checkBuilderDeclared() {
         builder?.let {
-            throw IllegalStateException("Can't define more than 1 callback for the DSL (only 1 linear or iterative)")
+            throw IllegalStateException("Can't define more than 1 callback for the root DSL (only 1 linear or iterative allowed)")
         }
     }
 
     override fun execute() {
+        gamepad1.gamepad = opMode.gamepad1
+        gamepad2.gamepad = opMode.gamepad2
+
         builder?.execute()
     }
 

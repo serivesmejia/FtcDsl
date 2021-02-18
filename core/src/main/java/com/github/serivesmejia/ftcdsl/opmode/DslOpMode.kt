@@ -31,6 +31,10 @@ open class DslOpMode<R: RobotBuilder>(buildCallback: OpModeDslBuilder<R>.() -> U
             callback()
         }
     }
+    
+    fun update() {
+
+    }
 
     inline fun <reified T : HardwareDevice> device(name: String): T = hardwareMap.get(T::class.java, name)!!
 

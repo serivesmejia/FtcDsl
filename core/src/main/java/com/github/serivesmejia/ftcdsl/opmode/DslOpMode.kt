@@ -1,21 +1,42 @@
 package com.github.serivesmejia.ftcdsl.opmode
 
-class DslOpMode(c_init: DslLinearOpMode.() -> Unit,
-                c_init_loop: DslLinearOpMode.() -> Unit = {},
-                c_start: DslLinearOpMode.() -> Unit = {},
-                c_loop: DslLinearOpMode.() -> Unit,
-                c_stop: DslLinearOpMode.() -> Unit = {}) : DslLinearOpMode({
-    c_init()
+import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.OpModeDslBuilder
+import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.hardware.*
 
-    while(!isStarted && !isStopRequested) {
-        c_init_loop();
+open class DslOpMode<R: RobotBuilder>(buildCallback: OpModeDslBuilder<R>.() -> Unit) : LinearOpMode() {
+
+    private val builder = OpModeDslBuilder(this)
+
+    var robot: R? = null
+        set(value) {
+            field?.let {
+                throw IllegalAccessException("robot variable cannot be modified at this point")
+            }
+            field = value
+        }
+
+    init {
+        buildCallback(builder)
     }
 
-    c_start()
-
-    while(opModeIsActive()) {
-        c_loop()
+    override fun runOpMode() {
+        robot?.build(hardwareMap)
+        builder.execute()
     }
 
-    c_stop()
-})
+    fun whileActive(callback: () -> Unit) {
+        while(!Thread.currentThread().isInterrupted) {
+            callback()
+        }
+    }
+
+    inline fun <reified T : HardwareDevice> device(name: String): T = hardwareMap.get(T::class.java, name)!!
+
+    infix fun dcMotor(name: String) = device<DcMotor>(name)
+    infix fun dcMotorEx(name: String) = device<DcMotorEx>(name)
+
+    infix fun servo(name: String) = device<Servo>(name)
+
+}

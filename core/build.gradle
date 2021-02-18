@@ -1,0 +1,54 @@
+buildscript {
+	ext.kotlin_version = '1.4.21'
+    repositories {
+        jcenter()
+        google()
+    }
+    dependencies{
+        classpath 'com.android.tools.build:gradle:3.5.1'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.serivesmejia'
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildTypes {
+        release {
+			minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+repositories {
+    maven { url = "https://dl.bintray.com/first-tech-challenge/ftcsdk/" }
+    google()
+    jcenter()
+}
+
+dependencies {
+	compileOnly 'org.firstinspires.ftc:RobotCore:6.0.1'
+	compileOnly 'org.firstinspires.ftc:Hardware:6.0.1'
+	compileOnly 'org.firstinspires.ftc:FtcCommon:6.0.1'
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}

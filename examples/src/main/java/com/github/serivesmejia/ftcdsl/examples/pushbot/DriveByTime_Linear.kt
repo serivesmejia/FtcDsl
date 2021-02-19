@@ -10,8 +10,7 @@ class DriveByTime_Linear : DslOpMode<PushBotRobot>({
     val TURN_SPEED = 0.5
 
     linear {
-        telemetry.addData("Status", "Ready to run")
-        telemetry.update()
+        telemetry { data("Status", "Ready to run") }
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart()
@@ -31,8 +30,7 @@ class DriveByTime_Linear : DslOpMode<PushBotRobot>({
         robot.leftClaw position 1.0
         robot.rightClaw position 0.0
 
-        telemetry.addData("Path", "Complete")
-        telemetry.update()
+        telemetry { data("Path", "Complete") }
 
         sleep(1000)
     }

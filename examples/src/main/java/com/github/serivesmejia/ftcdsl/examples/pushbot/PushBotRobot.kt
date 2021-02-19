@@ -42,10 +42,11 @@ class PushBotRobot : RobotBuilder() {
         leftDrive power left
         rightDrive power right
 
-        whileTime(timeSecs * 1000.0) {
-            telemetry.addData("[Status]", "Driving...");
-            telemetry.addData("[Time]", "%.1f out of %.1f seconds remaining", it, timeSecs);
-            telemetry.update()
+        whileTime(timeSecs * 1000.0) { elapsedMillis ->
+            telemetry {
+                data("Status", "Driving...")
+                data("Time", "%.1f out of %.1f seconds remaining", elapsedMillis / 1000.0, timeSecs)
+            }
         }
 
         leftDrive power 0.0

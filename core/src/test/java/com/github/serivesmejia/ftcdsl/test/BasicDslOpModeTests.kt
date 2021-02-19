@@ -16,6 +16,13 @@ class BasicDslOpModeTests {
         override fun build() {
             a = 5
         }
+
+        fun withOpModeTest() = withOpMode<Int> {
+            a += 5
+            sleep(1000)
+
+            return a
+        }
     }
 
     class LinearBasicTestOpMode : DslOpMode<BasicTestRobot>({
@@ -120,7 +127,7 @@ class BasicDslOpModeTests {
             IllegalTwoStylesBasicTestOpMode()
             false
         } catch(e: IllegalStateException) {
-            e.printStackTrace()
+            e.printStackTrace(System.out)
             true
         }
 
@@ -133,7 +140,7 @@ class BasicDslOpModeTests {
             IllegalIterativeBasicTestOpMode()
             false
         } catch(e: IllegalStateException) {
-            e.printStackTrace()
+            e.printStackTrace(System.out)
             true
         }
 
@@ -149,13 +156,12 @@ class BasicDslOpModeTests {
             opMode.runOpMode()
             false
         } catch(e: ClassCastException) {
-            e.printStackTrace()
+            e.printStackTrace(System.out)
             true
         }
 
         assertTrue(invalid)
     }
-
 
     @Test
     fun TestIllegalGamepadBasicDslOpMode() {
@@ -166,11 +172,55 @@ class BasicDslOpModeTests {
             opMode.runOpMode()
             false
         } catch(e: IllegalStateException) {
-            e.printStackTrace()
+            e.printStackTrace(System.out)
             true
         }
 
         assertTrue(invalid)
+    }
+
+    class WithOpModeBasicTestOpMode : DslOpMode<EmptyRobot>({
+        var a = 5
+
+        fun withOpModeTest() = withOpMode<Int> {
+            sleep(1000)
+            return a + 5
+        }
+
+        linear {
+            assertEquals(a + 5, withOpModeTest())
+        }
+    })
+
+    class RobotWithOpModeBasicTestOpMode : DslOpMode<BasicTestRobot>({
+        robot = BasicTestRobot()
+
+        linear {
+            robot.withOpModeTest()
+            assertEquals(robot.a, 10)
+        }
+    })
+
+    @Test
+    fun TestWithOpModeBasicDslOpMode() {
+        val opMode = WithOpModeBasicTestOpMode()
+        opMode.hardwareMap = HardwareMap(null)
+
+        val timer = ElapsedTime()
+        opMode.runOpMode()
+
+        assertEquals(1000.0, timer.milliseconds(), 100.0)
+    }
+
+    @Test
+    fun TestRobotWithOpModeBasicDslOpMode() {
+        val opMode = RobotWithOpModeBasicTestOpMode()
+        opMode.hardwareMap = HardwareMap(null)
+
+        val timer = ElapsedTime()
+        opMode.runOpMode()
+
+        assertEquals(1000.0, timer.milliseconds(), 100.0)
     }
 
 }

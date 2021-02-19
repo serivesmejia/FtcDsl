@@ -36,7 +36,7 @@ class TeleOpTank_Iterative : DslOpMode<PushBotRobot>({
         update {
             // Running wheels in tank mode (note that the joystick
             // goes negative when pushed forwards, so negate it)
-            val left = -gamepad1.left_stick_x.toDouble()
+            val left = -gamepad1.left_stick_y.toDouble()
             val right = -gamepad1.right_stick_y.toDouble()
 
             robot.leftDrive power left

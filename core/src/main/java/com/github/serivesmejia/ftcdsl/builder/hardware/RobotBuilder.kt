@@ -14,9 +14,7 @@ abstract class RobotBuilder {
         build()
     }
 
-    inline fun <reified T> withOpMode(callback: DslOpMode<*>.() -> T) {
-        callback(opMode)
-    }
+    inline fun <reified T> withOpMode(callback: DslOpMode<*>.() -> T): T = callback(opMode)
 
     abstract fun build()
 

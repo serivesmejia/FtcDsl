@@ -20,7 +20,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build core with Gradle
       run: ./gradlew -x test --stacktrace
-    - name: Test with Gradle
+    - name: Test core with Gradle
       run: ./gradlew :core:test --stacktrace
     - name: Build examples with Gradle
       run: ./gradlew :examples:build --stacktrace

@@ -5,12 +5,15 @@ import com.github.serivesmejia.ftcdsl.builder.dsl.gamepad.GamepadDslBuilder
 import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslOpModeStyleBuilder
 import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslIterativeStyleBuilder
 import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslLinearStyleBuilder
+import com.github.serivesmejia.ftcdsl.builder.hardware.EmptyRobot
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 
 class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
 
     private var builder: DslOpModeStyleBuilder<R>? = null
+
+    var opMode: DslOpMode<R>? = null
 
     var robot: R? = null
         set(value) {
@@ -41,6 +44,13 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
 
     fun gamepad2(callback: GamepadDslBuilder<R>.() -> Unit) = callback(gamepad2)
 
+    inline fun <reified T> withOpMode(callback: DslOpMode<R>.() -> T): T {
+        opMode?.let {
+            return callback(it)
+        }
+        throw IllegalStateException("Cannot call withOpMode before the OpMode has actually started")
+    }
+
     fun executeGamepads() {
         gamepad1.execute()
         gamepad2.execute()
@@ -56,14 +66,27 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
 
      fun execute(opMode: DslOpMode<R>?) {
          //setting the dsl gamepads the sdk instances
+         this.opMode = opMode
+
          gamepad1.opMode = opMode
          gamepad1.gamepad = opMode?.gamepad1
 
          gamepad2.opMode = opMode
          gamepad2.gamepad = opMode?.gamepad2
 
-         opMode?.robot = robot
-         opMode?.hardwareMap?.let { robot?.internalBuild(it) }
+         if(robot == null) {
+             try {
+                 robot = EmptyRobot as R
+             } catch(e: ClassCastException) {
+                 throw IllegalStateException("A robot instance needs to be created and passed if EmptyRobot is not the type parameter")
+             }
+         }
+
+         opMode?.robot = robot!!
+
+         opMode?.let {
+             robot?.internalBuild(it)
+         }
 
          //build mini dsl here if user is just using the gamepad stuff
          if(builder == null) {

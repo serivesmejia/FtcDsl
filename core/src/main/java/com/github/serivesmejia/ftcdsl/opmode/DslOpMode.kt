@@ -9,20 +9,13 @@ import com.qualcomm.robotcore.util.ElapsedTime
 open class DslOpMode<R: RobotBuilder>(buildCallback: DslOpModeBuilder<R>.() -> Unit) : LinearOpMode() {
 
     private var builder: DslOpModeBuilder<R> = DslOpModeBuilder()
+    lateinit var robot: R
 
     private var timer = ElapsedTime()
 
     init {
         buildCallback(builder)
     }
-
-    var robot: R? = null
-        set(value) {
-            field?.let {
-                throw IllegalAccessException("robot variable cannot be modified twice")
-            }
-            field = value
-        }
 
     override fun runOpMode() = builder.execute(this)
 
@@ -32,11 +25,11 @@ open class DslOpMode<R: RobotBuilder>(buildCallback: DslOpModeBuilder<R>.() -> U
         }
     }
 
-    fun whileTime(millis: Long, callback: () -> Unit) {
+    fun whileTime(millis: Double, callback: (transcurredMillis: Double) -> Unit) {
         timer.reset()
 
         while(timer.milliseconds() < millis) {
-            callback()
+            callback(timer.milliseconds())
         }
     }
     

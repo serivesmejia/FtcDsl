@@ -1,6 +1,10 @@
 package com.github.serivesmejia.ftcdsl.examples.pushbot
 
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
+import com.github.serivesmejia.ftcdsl.extension.hardware.DcMotorExt.direction
+import com.github.serivesmejia.ftcdsl.extension.hardware.DcMotorExt.forward
+import com.github.serivesmejia.ftcdsl.extension.hardware.DcMotorExt.power
+import com.github.serivesmejia.ftcdsl.extension.hardware.ServoExt.position
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -25,13 +29,27 @@ class PushBotRobot : RobotBuilder() {
         rightDrive = device("right_drive")
         leftArm = device("left_arm")
 
-        rightDrive.direction = DcMotorSimple.Direction.FORWARD
+        rightDrive direction forward
 
         leftClaw = device("left_hand")
         rightClaw = device("right_hand")
 
-        leftClaw.position = MID_SERVO
-        rightClaw.position = MID_SERVO
+        leftClaw position MID_SERVO
+        rightClaw position MID_SERVO
+    }
+
+    fun driveTime(timeSecs: Double, left: Double, right: Double) = withOpMode {
+        leftDrive power left
+        rightDrive power right
+
+        whileTime(timeSecs * 1000.0) {
+            telemetry.addData("[Status]", "Driving...");
+            telemetry.addData("[Time]", "%.1f out of %.1f seconds remaining", it, timeSecs);
+            telemetry.update()
+        }
+
+        leftDrive power 0.0
+        rightDrive power 0.0
     }
 
 }

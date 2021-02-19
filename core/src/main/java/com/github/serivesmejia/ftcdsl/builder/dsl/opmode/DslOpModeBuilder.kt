@@ -26,12 +26,20 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
     private val gamepad1 = GamepadDslBuilder<R>()
     private val gamepad2 = GamepadDslBuilder<R>()
 
-    fun iterative(callback: DslIterativeStyleBuilder<R>.() -> Unit) {
-        checkBuilderDeclared()
-        builder = DslIterativeStyleBuilder()
+    val iterative : DslIterativeStyleBuilder<R>
+        get() {
+            checkBuilderDeclared()
+            //declare in different val to have iterative type
+            //and not having to cast later when returning
+            val builder = DslIterativeStyleBuilder<R>()
 
+            this.builder = builder
+            return builder
+        }
+
+    fun iterative(callback: DslIterativeStyleBuilder<R>.() -> Unit) {
         //call the callback which will build the DSL
-        callback(builder!! as DslIterativeStyleBuilder<R>)
+        callback(iterative)
     }
 
     fun linear(callback: DslOpMode<R>.() -> Unit) {

@@ -29,6 +29,8 @@ class GamepadButtonDslBuilder<R : RobotBuilder>(private val button: Button,
         pressingCall = callback
     }
 
+    fun its(button: Button) = gamepadDslBuilder.gamepad?.get(button) ?: false
+
     var beforePressed = false
 
     override fun execute() {

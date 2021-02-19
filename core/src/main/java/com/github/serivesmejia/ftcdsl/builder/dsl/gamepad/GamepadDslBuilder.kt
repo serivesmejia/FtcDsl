@@ -33,8 +33,16 @@ class GamepadDslBuilder<R : RobotBuilder> : DslBuilder {
     var gamepad: Gamepad? = null
     var opMode: DslOpMode<R>? = null
 
+    private var updateCall: (DslOpMode<R>.() -> Unit)? = null
+
     fun button(button: Button, callback: GamepadButtonDslBuilder<R>.() -> Unit) {
         callback(button(button))
+    }
+
+    fun buttons(vararg buttons: Button, callback: GamepadButtonDslBuilder<R>.() -> Unit) {
+        for(button in buttons) {
+            button(button, callback)
+        }
     }
 
     fun button(button: Button): GamepadButtonDslBuilder<R> {
@@ -48,9 +56,22 @@ class GamepadDslBuilder<R : RobotBuilder> : DslBuilder {
         return builder
     }
 
+    fun update(callback: DslOpMode<R>.() -> Unit) {
+        updateCall?.let {
+            throw IllegalStateException("Only one update callback for gamepad DSL is allowed")
+        }
+        updateCall = callback
+    }
+
     override fun execute() = buttonBuilders.values.forEach {
-        it.opMode = opMode
-        it.execute()
+        opMode?.let { opMode ->
+            updateCall?.let { call ->
+                call(opMode)
+            }
+
+            it.opMode = opMode
+            it.execute()
+        }
     }
 
 }

@@ -36,7 +36,7 @@ open class DslOpMode<R: RobotBuilder>(buildCallback: DslOpModeBuilder<R>.() -> U
     fun whileTime(millis: Double, callback: (elapsedMillis: Double) -> Unit) {
         timer.reset()
 
-        while(timer.milliseconds() < millis) {
+        while(timer.milliseconds() < millis && !Thread.currentThread().isInterrupted) {
             callback(timer.milliseconds())
         }
     }

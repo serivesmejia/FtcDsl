@@ -23,8 +23,8 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
             field = value
         }
 
-    private val gamepad1 = GamepadDslBuilder<R>()
-    private val gamepad2 = GamepadDslBuilder<R>()
+    private var gamepad1: GamepadDslBuilder<R>? = null
+    private var gamepad2: GamepadDslBuilder<R>? = null
 
     val iterative : DslIterativeStyleBuilder<R>
         get() {
@@ -48,9 +48,23 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
         //no need to call callback here since we're not building anything else for linear
     }
 
-    fun gamepad1(callback: GamepadDslBuilder<R>.() -> Unit) = callback(gamepad1)
+    fun gamepad1(callback: GamepadDslBuilder<R>.() -> Unit) {
+        gamepad1?.let {
+            throw IllegalStateException("Can't define more than 1 callback for gamepad1")
+        }
 
-    fun gamepad2(callback: GamepadDslBuilder<R>.() -> Unit) = callback(gamepad2)
+        gamepad1 = GamepadDslBuilder()
+        callback(gamepad1!!)
+    }
+
+    fun gamepad2(callback: GamepadDslBuilder<R>.() -> Unit) {
+        gamepad2?.let {
+            throw IllegalStateException("Can't define more than 1 callback for gamepad2")
+        }
+
+        gamepad2 = GamepadDslBuilder()
+        callback(gamepad1!!)
+    }
 
     inline fun <reified T> withOpMode(callback: DslOpMode<R>.() -> T): T {
         opMode?.let {
@@ -60,8 +74,8 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
     }
 
     fun executeGamepads() {
-        gamepad1.execute()
-        gamepad2.execute()
+        gamepad1?.execute()
+        gamepad2?.execute()
     }
 
     //simple check to throw an exception if user is
@@ -76,18 +90,14 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
          //setting the dsl gamepads the sdk instances
          this.opMode = opMode
 
-         gamepad1.opMode = opMode
-         gamepad1.gamepad = opMode?.gamepad1
+         gamepad1?.opMode = opMode
+         gamepad1?.gamepad = opMode?.gamepad1
 
-         gamepad2.opMode = opMode
-         gamepad2.gamepad = opMode?.gamepad2
+         gamepad2?.opMode = opMode
+         gamepad2?.gamepad = opMode?.gamepad2
 
          if(robot == null) {
-             try {
-                 robot = EmptyRobot as R
-             } catch(e: ClassCastException) {
-                 throw IllegalStateException("A robot instance needs to be created and passed if EmptyRobot is not the type parameter")
-             }
+             robot = EmptyRobot as R
          }
 
          opMode?.robot = robot!!
@@ -108,8 +118,8 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
 
         builder!!.opMode = opMode
 
-        //actually execute the user dsl
-        builder!!.execute()
+         //actually execute the user dsl
+         builder!!.execute()
     }
 
     override fun execute() = execute(null)

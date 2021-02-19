@@ -1,5 +1,6 @@
 package com.github.serivesmejia.ftcdsl.test
 
+import com.github.serivesmejia.ftcdsl.builder.hardware.EmptyRobot
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -32,6 +33,34 @@ class BasicDslOpModeTests {
         }
     })
 
+    class IterativeBasicTestOpMode : DslOpMode<BasicTestRobot>({
+        robot = BasicTestRobot()
+
+        val timer = ElapsedTime()
+
+        iterative {
+            init {
+                timer.reset()
+                assertEquals(robot.a, 5)
+
+                whileTime(1000.0) {
+                    start()
+                }
+            }
+
+            start {
+                assertEquals(timer.milliseconds(), 1000.0, 100.0)
+                timer.reset()
+            }
+
+            loop {
+                sleep(2000)
+                Thread.currentThread().interrupt()
+            }
+        }
+    })
+
+
     @Test
     fun TestLinearBasicDslOpMode() {
         val opMode = LinearBasicTestOpMode()
@@ -40,7 +69,108 @@ class BasicDslOpModeTests {
         val timer = ElapsedTime()
         opMode.runOpMode()
 
-        assertEquals(timer.milliseconds(), 2000.0, 100.0)
+        assertEquals(2000.0, timer.milliseconds(), 100.0)
+    }
+
+    @Test
+    fun TestIterativeBasicDslOpMode() {
+        val opMode = IterativeBasicTestOpMode()
+        opMode.hardwareMap = HardwareMap(null)
+
+        val timer = ElapsedTime()
+        opMode.runOpMode()
+
+        assertEquals(3000.0, timer.milliseconds(), 100.0)
+    }
+
+    class IllegalTwoStylesBasicTestOpMode : DslOpMode<EmptyRobot>({
+        //illegal! we can't have both iterative and linear styles in one opmode
+        linear {}
+        iterative {}
+    })
+
+    class IllegalIterativeBasicTestOpMode : DslOpMode<EmptyRobot>({
+        iterative {
+            init {}
+            //illegal! we can't create two callbacks of the same thing in iterative
+            loop {}
+            loop {}
+        }
+    })
+
+    class IllegalGamepadsBasicTestOpMode : DslOpMode<EmptyRobot>({
+        gamepad1 {}
+        gamepad2 {}
+        gamepad1 {}
+    })
+
+    class IllegalNoRobotBasicTestOpMode : DslOpMode<BasicTestRobot>({
+        //illegal! we shouldn't have a robot type parameter that's not EmptyRobot and
+        //completely forget about instantiating and setting it in the main builder
+        linear {
+            robot.a = 0 //this will throw an exception...
+            sleep(1000)
+            //:thonk:
+        }
+    })
+
+    @Test
+    fun TestIllegalTwoStylesBasicDslOpMode() {
+        val invalid = try {
+            IllegalTwoStylesBasicTestOpMode()
+            false
+        } catch(e: IllegalStateException) {
+            e.printStackTrace()
+            true
+        }
+
+        assertTrue(invalid)
+    }
+
+    @Test
+    fun TestIllegalIterativeBasicDslOpMode() {
+        val invalid = try {
+            IllegalIterativeBasicTestOpMode()
+            false
+        } catch(e: IllegalStateException) {
+            e.printStackTrace()
+            true
+        }
+
+        assertTrue(invalid)
+    }
+
+    @Test
+    fun TestIllegalNoRobotBasicDslOpMode() {
+        val invalid = try {
+            val opMode = IllegalNoRobotBasicTestOpMode()
+            opMode.hardwareMap = HardwareMap(null)
+
+            opMode.runOpMode()
+            false
+        } catch(e: ClassCastException) {
+            e.printStackTrace()
+            true
+        }
+
+        assertTrue(invalid)
+    }
+
+
+    @Test
+    fun TestIllegalGamepadBasicDslOpMode() {
+        val invalid = try {
+            val opMode = IllegalGamepadsBasicTestOpMode()
+            opMode.hardwareMap = HardwareMap(null)
+
+            opMode.runOpMode()
+            false
+        } catch(e: IllegalStateException) {
+            e.printStackTrace()
+            true
+        }
+
+        assertTrue(invalid)
     }
 
 }

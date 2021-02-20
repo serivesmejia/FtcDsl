@@ -180,7 +180,7 @@ class BasicDslOpModeTests {
     }
 
     class WithOpModeBasicTestOpMode : DslOpMode<EmptyRobot>({
-        var a = 5
+        val a = 1
 
         fun withOpModeTest() = withOpMode<Int> {
             sleep(1000)

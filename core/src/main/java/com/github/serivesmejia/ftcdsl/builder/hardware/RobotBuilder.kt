@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.hardware.*
 abstract class RobotBuilder {
 
     lateinit var hardwareMap: HardwareMap
-    lateinit var opMode: DslOpMode<*>
+        private set
+    var opMode: DslOpMode<*>? = null
+        private set
 
     fun internalBuild(opMode: DslOpMode<*>) {
         this.opMode = opMode
@@ -14,7 +16,12 @@ abstract class RobotBuilder {
         build()
     }
 
-    inline fun <reified T> withOpMode(callback: DslOpMode<*>.() -> T): T = callback(opMode)
+    inline fun <reified T> withOpMode(callback: DslOpMode<*>.() -> T): T {
+        opMode?.let {
+            return callback(it)
+        }
+        throw IllegalStateException("Cannot call withOpMode before the OpMode has actually started")
+    }
 
     abstract fun build()
 

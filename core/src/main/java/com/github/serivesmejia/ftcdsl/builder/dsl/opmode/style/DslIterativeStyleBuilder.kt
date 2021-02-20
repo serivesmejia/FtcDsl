@@ -42,16 +42,16 @@ class DslIterativeStyleBuilder<R : RobotBuilder> : DslOpModeStyleBuilder<R>() {
 
             while (!opMode.isStarted && !opMode.isStopRequested) {
                 call(initLoopCall)
-                opMode.updateGamepads()
             }
 
-            opMode.waitForStart() //just in case
+            //exit if user pressed stop after init
+            if(opMode.isStopRequested) return
 
             call(startCall)
 
             while (!Thread.currentThread().isInterrupted) {
                 call(loopCall)
-                opMode.updateGamepads()
+                opMode.update()
             }
 
             call(stopCall)

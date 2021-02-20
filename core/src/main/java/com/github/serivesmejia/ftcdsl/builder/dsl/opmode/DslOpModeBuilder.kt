@@ -7,11 +7,13 @@ import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslIterativeStyle
 import com.github.serivesmejia.ftcdsl.builder.dsl.opmode.style.DslLinearStyleBuilder
 import com.github.serivesmejia.ftcdsl.builder.hardware.EmptyRobot
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
+import com.github.serivesmejia.ftcdsl.builder.misc.TimerBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
+import com.github.serivesmejia.ftcdsl.util.Timer
 
-class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
+class DslOpModeBuilder<R : RobotBuilder>(private val timerBuilder: TimerBuilder) : DslBuilder {
 
-    private var builder: DslOpModeStyleBuilder<R>? = null
+    private var styleBuilder: DslOpModeStyleBuilder<R>? = null
 
     var opMode: DslOpMode<R>? = null
 
@@ -32,8 +34,8 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
             //declare in different val to have iterative type
             //and not having to cast later when returning
             val builder = DslIterativeStyleBuilder<R>()
+            this.styleBuilder = builder
 
-            this.builder = builder
             return builder
         }
 
@@ -44,7 +46,7 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
 
     fun linear(callback: DslOpMode<R>.() -> Unit) {
         checkBuilderDeclared()
-        builder = DslLinearStyleBuilder(callback)
+        styleBuilder = DslLinearStyleBuilder(callback)
         //no need to call callback here since we're not building anything else for linear
     }
 
@@ -66,6 +68,14 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
         callback(gamepad1!!)
     }
 
+    fun timeout(millis: Double, call: (Timer) -> Unit) = timerBuilder.setTimeout(millis, call)
+
+    fun interval(millis: Double, call: (Timer) -> Unit) = timerBuilder.setInterval(millis, call)
+
+    /**
+     * Runs a block of code in the context of an OpMode<br/>
+     * Useful when declaring functions in this DslOpModeBuilder context
+     */
     inline fun <reified T> withOpMode(callback: DslOpMode<R>.() -> T): T {
         opMode?.let {
             return callback(it)
@@ -81,47 +91,47 @@ class DslOpModeBuilder<R : RobotBuilder> : DslBuilder {
     //simple check to throw an exception if user is
     //trying to register more than one callback...
     private fun checkBuilderDeclared() {
-        builder?.let {
+        styleBuilder?.let {
             throw IllegalStateException("Can't define more than 1 callback for the root DSL (only 1 linear or iterative allowed)")
         }
     }
 
-     fun execute(opMode: DslOpMode<R>?) {
+     fun execute(opMode: DslOpMode<R>) {
          //setting the dsl gamepads the sdk instances
          this.opMode = opMode
 
          gamepad1?.opMode = opMode
-         gamepad1?.gamepad = opMode?.gamepad1
+         gamepad1?.gamepad = opMode.gamepad1
 
          gamepad2?.opMode = opMode
-         gamepad2?.gamepad = opMode?.gamepad2
+         gamepad2?.gamepad = opMode.gamepad2
 
          if(robot == null) {
              robot = EmptyRobot as R
          }
 
-         opMode?.robot = robot!!
+         opMode.robot = robot!!
+         robot!!.internalBuild(opMode)
 
-         opMode?.let {
-             robot?.internalBuild(it)
-         }
-
-         //build mini dsl here if user is just using the gamepad stuff
-         if(builder == null) {
+         //build mini dsl here if user is just using the gamepad
+         //stuff or didn't declared a style for any reason
+         if(styleBuilder == null) {
             linear {
                 waitForStart()
                 whileActive {
-                    updateGamepads()
+                    update() //simply update
                 }
             }
-        }
+         }
 
-        builder!!.opMode = opMode
+         styleBuilder!!.opMode = opMode
 
-         //actually execute the user dsl
-         builder!!.execute()
+         //actually execute the dsl
+         styleBuilder!!.execute()
     }
 
-    override fun execute() = execute(null)
+    override fun execute() {
+        throw UnsupportedOperationException("execute() without any parameters isn't available for DslOpModeBuilder (need to pass a DslOpMode instance)")
+    }
 
 }

@@ -24,6 +24,8 @@ open class DslOpMode<R: RobotBuilder>(buildCallback: DslOpModeBuilder<R>.() -> U
 
     lateinit var robot: R
 
+    private var breakWhileActive = false
+
     init {
         buildCallback(builder)
     }
@@ -73,10 +75,17 @@ open class DslOpMode<R: RobotBuilder>(buildCallback: DslOpModeBuilder<R>.() -> U
      * until the OpMode stops
      */
     fun whileActive(callback: () -> Unit) {
-        while(!Thread.currentThread().isInterrupted) {
+        while(!Thread.currentThread().isInterrupted && !breakWhileActive) {
             callback()
         }
+
+        breakWhileActive = false
     }
+
+    /**
+     * Breaks out of the whileActive loop
+     */
+    fun breakWhile() { breakWhileActive = true }
 
     /**
      * Executes a code block in a loop during the

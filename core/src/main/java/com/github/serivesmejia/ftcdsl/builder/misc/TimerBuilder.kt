@@ -6,6 +6,9 @@ class TimerBuilder {
 
     private val timers = ArrayList<Timer>()
 
+    val busy: Boolean
+        get() = timers.size > 0
+
     fun update() {
         for(timer in timers.toTypedArray()) {
             timer.update()

@@ -25,6 +25,9 @@ class DslOpModeBuilder<R : RobotBuilder>(private val timerBuilder: TimerBuilder)
             field = value
         }
 
+    val busy: Boolean
+        get() = gamepad1 != null || gamepad2 != null || timerBuilder.busy
+
     private var gamepad1: GamepadDslBuilder<R>? = null
     private var gamepad2: GamepadDslBuilder<R>? = null
 
@@ -96,30 +99,32 @@ class DslOpModeBuilder<R : RobotBuilder>(private val timerBuilder: TimerBuilder)
         }
     }
 
-     fun execute(opMode: DslOpMode<R>) {
-         //setting the dsl gamepads the sdk instances
-         this.opMode = opMode
+    fun execute(opMode: DslOpMode<R>) {
+        //setting the dsl gamepads the sdk instances
+        this.opMode = opMode
 
-         gamepad1?.opMode = opMode
-         gamepad1?.gamepad = opMode.gamepad1
+        gamepad1?.opMode = opMode
+        gamepad1?.gamepad = opMode.gamepad1
 
-         gamepad2?.opMode = opMode
-         gamepad2?.gamepad = opMode.gamepad2
+        gamepad2?.opMode = opMode
+        gamepad2?.gamepad = opMode.gamepad2
 
-         if(robot == null) {
-             robot = EmptyRobot as R
-         }
+        if(robot == null) {
+            robot = EmptyRobot as R
+        }
 
-         opMode.robot = robot!!
-         robot!!.internalBuild(opMode)
+        opMode.robot = robot!!
+        robot!!.internalBuild(opMode)
 
-         //build mini dsl here if user is just using the gamepad
-         //stuff or didn't declared a style for any reason
-         if(styleBuilder == null) {
+        //build mini dsl here if user is just using the gamepad
+        //or timer stuff, or didn't declared a style for any reason
+        if(styleBuilder == null) {
             linear {
                 waitForStart()
+
                 whileActive {
                     update() //simply update
+                    if(!busy) breakWhile() //break out of the loop if we arent doing anything
                 }
             }
          }
@@ -131,7 +136,7 @@ class DslOpModeBuilder<R : RobotBuilder>(private val timerBuilder: TimerBuilder)
     }
 
     override fun execute() {
-        throw UnsupportedOperationException("execute() without any parameters isn't available for DslOpModeBuilder (need to pass a DslOpMode instance)")
+        throw UnsupportedOperationException("execute() without any parameters isn't supported for DslOpModeBuilder (need to pass a DslOpMode instance)")
     }
 
 }

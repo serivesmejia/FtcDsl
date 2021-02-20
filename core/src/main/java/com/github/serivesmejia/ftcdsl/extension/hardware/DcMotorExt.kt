@@ -17,7 +17,7 @@ object DcMotorExt {
     val brake = DcMotor.ZeroPowerBehavior.BRAKE
 
     infix fun DcMotorSimple.power(power: Double) = setPower(power)
-    infix fun DcMotor.run(runMode: DcMotor.RunMode) = setMode(runMode)
+    infix fun DcMotor.mode(runMode: DcMotor.RunMode) = setMode(runMode)
     infix fun DcMotorSimple.direction(direction: DcMotorSimple.Direction) = setDirection(direction)
     infix fun DcMotor.onStop(behavior: DcMotor.ZeroPowerBehavior) = setZeroPowerBehavior(behavior)
 

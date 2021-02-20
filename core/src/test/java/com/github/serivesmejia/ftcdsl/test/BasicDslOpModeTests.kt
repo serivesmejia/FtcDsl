@@ -3,7 +3,6 @@ package com.github.serivesmejia.ftcdsl.test
 import com.github.serivesmejia.ftcdsl.builder.hardware.EmptyRobot
 import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
-import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.junit.*
 import org.junit.Assert.*
@@ -15,6 +14,7 @@ class BasicDslOpModeTests {
 
         override fun build() {
             a = 5
+            assertTrue(hardwareMap != null)
         }
 
         fun withOpModeTest() = withOpMode<Int> {

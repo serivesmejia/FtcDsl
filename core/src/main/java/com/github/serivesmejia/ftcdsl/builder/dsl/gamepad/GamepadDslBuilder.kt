@@ -5,6 +5,12 @@ import com.github.serivesmejia.ftcdsl.builder.hardware.RobotBuilder
 import com.github.serivesmejia.ftcdsl.opmode.DslOpMode
 import com.qualcomm.robotcore.hardware.Gamepad
 
+/**
+ * Represents a gamepad to be built inside a DslOpMode Builder.
+ * It's the parent builder of GamepadButtonDslBuilder's
+ * @see GamepadButtonDslBuilder
+ * @see DslOpModeBuilder
+ */
 class GamepadDslBuilder<R : RobotBuilder> : DslBuilder {
 
     val A = Button.A
@@ -35,16 +41,60 @@ class GamepadDslBuilder<R : RobotBuilder> : DslBuilder {
 
     private var updateCall: (DslOpMode<R>.() -> Unit)? = null
 
+    /**
+     * Builds a single gamepad button with a builder callback.<br/>
+     * Allows for the following syntax:
+     * <pre>
+     * {@code
+     *  gamepad1 {
+     *      button(A) {
+     *          pressed { ... }
+     *          //...
+     *      }
+     *  }
+     * }
+     * </pre>
+     * @throws IllegalStateException if the specified button has already been built
+     */
     fun button(button: Button, callback: GamepadButtonDslBuilder<R>.() -> Unit) {
         callback(button(button))
     }
 
+    /**
+    * Builds multiple gamepad buttons with a builder callback
+    * Allows for the following syntax:
+    * <pre>
+    * {@code
+    *  gamepad1 {
+    *      buttons(A, B) {
+    *          pressed { ... }
+    *          //...
+    *      }
+    *  }
+    * }
+    * </pre>
+    * @throws IllegalStateException if one or more of the specified buttons has already been built
+    */
     fun buttons(vararg buttons: Button, callback: GamepadButtonDslBuilder<R>.() -> Unit) {
         for(button in buttons) {
             button(button, callback)
         }
     }
 
+    /**
+     * Returns a button builder for the specified button.
+     * Allows for the following syntax:
+     * <pre>
+     * {@code
+     *  gamepad1 {
+     *      button(A).pressed {
+     *          //...
+     *      }
+     *  }
+     * }
+     * </pre>
+     * @throws IllegalStateException if one or more of the specified buttons has already been built
+     */
     fun button(button: Button): GamepadButtonDslBuilder<R> {
         if(buttonBuilders.containsKey(button)) {
             throw IllegalStateException("Callback has been already registered for button $button")
@@ -56,6 +106,10 @@ class GamepadDslBuilder<R : RobotBuilder> : DslBuilder {
         return builder
     }
 
+    /**
+     * Registers a callback that will be called repetitively
+     * every time this gamepad is executed
+     */
     fun update(callback: DslOpMode<R>.() -> Unit) {
         updateCall?.let {
             throw IllegalStateException("Only one update callback for gamepad DSL is allowed")
@@ -63,6 +117,9 @@ class GamepadDslBuilder<R : RobotBuilder> : DslBuilder {
         updateCall = callback
     }
 
+    /**
+     * Executes/updates this gamepad. This is where all the user callbacks will get executed
+     */
     override fun execute() = buttonBuilders.values.forEach {
         opMode?.let { opMode ->
             updateCall?.let { call ->

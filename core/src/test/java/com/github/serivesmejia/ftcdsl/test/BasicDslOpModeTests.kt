@@ -127,7 +127,7 @@ class BasicDslOpModeTests {
             IllegalTwoStylesBasicTestOpMode()
             false
         } catch(e: IllegalStateException) {
-            e.printStackTrace(System.out)
+            println(e.message)
             true
         }
 
@@ -140,7 +140,7 @@ class BasicDslOpModeTests {
             IllegalIterativeBasicTestOpMode()
             false
         } catch(e: IllegalStateException) {
-            e.printStackTrace(System.out)
+            println(e.message)
             true
         }
 
@@ -156,7 +156,7 @@ class BasicDslOpModeTests {
             opMode.runOpMode()
             false
         } catch(e: ClassCastException) {
-            e.printStackTrace(System.out)
+            println(e.message)
             true
         }
 
@@ -172,7 +172,7 @@ class BasicDslOpModeTests {
             opMode.runOpMode()
             false
         } catch(e: IllegalStateException) {
-            e.printStackTrace(System.out)
+            println(e.message)
             true
         }
 

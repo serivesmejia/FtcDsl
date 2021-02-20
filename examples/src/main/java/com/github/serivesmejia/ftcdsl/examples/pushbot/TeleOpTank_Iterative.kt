@@ -22,9 +22,9 @@ class TeleOpTank_Iterative : DslOpMode<PushBotRobot>({
 
         buttons(Y, A) {
             pressing {
-                if(its(Y))
+                if(`is`(Y))
                     robot.leftArm power robot.ARM_UP_POWER
-                else if(its(A))
+                else if(`is`(A))
                     robot.leftArm power robot.ARM_DOWN_POWER
             }
 

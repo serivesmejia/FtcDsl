@@ -27,8 +27,4 @@ abstract class RobotBuilder {
 
     inline fun <reified T : HardwareDevice> device(name: String) = hardwareMap.get(T::class.java, name)!!
 
-    infix fun dcMotor(name: String) = device<DcMotor>(name)
-    infix fun dcMotorEx(name: String) = device<DcMotorEx>(name)
-
-    infix fun servo(name: String) = device<Servo>(name)
 }

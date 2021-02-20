@@ -70,8 +70,7 @@ class BasicDslOpModeTests {
 
     @Test
     fun TestLinearBasicDslOpMode() {
-        val opMode = LinearBasicTestOpMode()
-        opMode.hardwareMap = HardwareMap(null)
+        val opMode = mockDslOpMode(LinearBasicTestOpMode())
 
         val timer = ElapsedTime()
         opMode.runOpMode()
@@ -81,8 +80,7 @@ class BasicDslOpModeTests {
 
     @Test
     fun TestIterativeBasicDslOpMode() {
-        val opMode = IterativeBasicTestOpMode()
-        opMode.hardwareMap = HardwareMap(null)
+        val opMode = mockDslOpMode(IterativeBasicTestOpMode())
 
         val timer = ElapsedTime()
         opMode.runOpMode()
@@ -150,8 +148,7 @@ class BasicDslOpModeTests {
     @Test
     fun TestIllegalNoRobotBasicDslOpMode() {
         val invalid = try {
-            val opMode = IllegalNoRobotBasicTestOpMode()
-            opMode.hardwareMap = HardwareMap(null)
+            val opMode = mockDslOpMode(IllegalNoRobotBasicTestOpMode())
 
             opMode.runOpMode()
             false
@@ -166,8 +163,7 @@ class BasicDslOpModeTests {
     @Test
     fun TestIllegalGamepadBasicDslOpMode() {
         val invalid = try {
-            val opMode = IllegalGamepadsBasicTestOpMode()
-            opMode.hardwareMap = HardwareMap(null)
+            val opMode = mockDslOpMode(IllegalGamepadsBasicTestOpMode())
 
             opMode.runOpMode()
             false
@@ -203,8 +199,7 @@ class BasicDslOpModeTests {
 
     @Test
     fun TestWithOpModeBasicDslOpMode() {
-        val opMode = WithOpModeBasicTestOpMode()
-        opMode.hardwareMap = HardwareMap(null)
+        val opMode = mockDslOpMode(WithOpModeBasicTestOpMode())
 
         val timer = ElapsedTime()
         opMode.runOpMode()
@@ -214,8 +209,7 @@ class BasicDslOpModeTests {
 
     @Test
     fun TestRobotWithOpModeBasicDslOpMode() {
-        val opMode = RobotWithOpModeBasicTestOpMode()
-        opMode.hardwareMap = HardwareMap(null)
+        val opMode = mockDslOpMode(RobotWithOpModeBasicTestOpMode())
 
         val timer = ElapsedTime()
         opMode.runOpMode()

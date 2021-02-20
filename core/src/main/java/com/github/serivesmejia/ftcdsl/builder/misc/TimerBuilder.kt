@@ -16,16 +16,13 @@ class TimerBuilder {
         }
     }
 
-    fun setTimeout(millis: Double, callback: (Timer) -> Unit): Timer {
-        val timer = Timer(millis)
-        timer.onTimeout(callback)
+    fun setTimeout(millis: Double, callback: (Timer) -> Unit) = addTimer(Timer(millis), callback)
 
-        return timer
-    }
+    fun setInterval(millis: Double, callback: (Timer) -> Unit) = addTimer(Timer(millis, true), callback)
 
-    fun setInterval(millis: Double, callback: (Timer) -> Unit): Timer {
-        val timer = Timer(millis, true)
-        timer.onTimeout(callback)
+    fun addTimer(timer: Timer, callback: ((Timer) -> Unit)? = null): Timer {
+        timers.add(timer)
+        callback?.let { timer.onTimeout(it) }
 
         return timer
     }
